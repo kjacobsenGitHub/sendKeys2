@@ -31,7 +31,7 @@ namespace sendKeys2
         private void button1_Click(object sender, EventArgs e)
         {
 
-
+             
             //string to open connection to DB
             string connectString = "DSN=Progress11;uid=bob;pwd=Orchard";
 
