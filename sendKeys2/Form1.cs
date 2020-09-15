@@ -25,8 +25,6 @@ namespace sendKeys2
         }
 
 
-
-
         //inventory item 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -493,8 +491,6 @@ namespace sendKeys2
                 OdbcCommand cmdMerge = new OdbcCommand(merge, dbConn);
                 cmdMerge.ExecuteNonQuery();
 
-
-
                 //ask user for Job-Desc first line and QTY; Job-Desc  and    Quantity-Ordered  
                 string jobDesc = Interaction.InputBox("Ex) 1234 Business Card (Quote) D Kyle Jacobsen","First line Job Description:");
 
@@ -509,8 +505,69 @@ namespace sendKeys2
                 cmdMergeQTY.ExecuteNonQuery();
 
 
-                
+
                 //free fields
+
+
+                #region Free fields
+                //now for job free fields for inventory order
+                //5/12 was stuck for a little bit, it was those dam quotes it has to be \"\" also for some reason the word Sequence needed
+                //them evne thi no dash in name
+                string freeField1 = "INSERT INTO PUB.JobFreeField (\"Job-ID\", \"Sub-Job-ID\", \"System-ID\", \"Sequence\", \"Module-ID\", \"Program-ID\",\"Free-Field-Char\")" +
+                 " VALUES (\'" + jobNum + "\', \' \', \'Viso\', \'2\', \'J/M\',\'jc/jobsu0.w\', \'DSF\')";
+                OdbcCommand cmd3 = new OdbcCommand(freeField1, dbConn);
+                cmd3.ExecuteNonQuery();
+
+
+                //this one does not work, may be able to get by without however
+                string freeField2 = "INSERT INTO PUB.JobFreeField (\"Job-ID\", \"Sub-Job-ID\", \"System-ID\", \"Sequence\", \"Module-ID\", \"Program-ID\",\"Free-Field-Char\")" +
+                 " VALUES (\'" + jobNum + "\', \' \', \'Viso\', \'3\', \'J/M\',\'jc/jobsu0.w\', \'1\')";
+                OdbcCommand cmd4 = new OdbcCommand(freeField2, dbConn);
+                cmd4.ExecuteNonQuery();
+
+
+                string freeField3 = "INSERT INTO PUB.JobFreeField (\"Job-ID\", \"Sub-Job-ID\", \"System-ID\", \"Sequence\", \"Module-ID\", \"Program-ID\",\"Free-Field-Char\")" +
+              " VALUES (\'" + jobNum + "\', \' \', \'Viso\', \'4\', \'J/M\',\'jc/jobsu0.w\', \'None\')";
+                OdbcCommand cmd5 = new OdbcCommand(freeField3, dbConn);
+                cmd5.ExecuteNonQuery();
+
+
+                string freeField4 = "INSERT INTO PUB.JobFreeField (\"Job-ID\", \"Sub-Job-ID\", \"System-ID\", \"Sequence\", \"Module-ID\", \"Program-ID\",\"Free-Field-Char\")" +
+                            " VALUES (\'" + jobNum + "\', \' \', \'Viso\', \'6\', \'J/M\',\'jc/jobsu0.w\', \'N/A\')";
+                OdbcCommand cmd6 = new OdbcCommand(freeField4, dbConn);
+                cmd6.ExecuteNonQuery();
+
+
+                string freeField9 = "INSERT INTO PUB.JobFreeField (\"Job-ID\", \"Sub-Job-ID\", \"System-ID\", \"Sequence\", \"Module-ID\", \"Program-ID\",\"Free-Field-Char\")" +
+                " VALUES (\'" + jobNum + "\', \' \', \'Viso\', \'9\', \'J/M\',\'jc/jobsu0.w\', \'None\')";
+                OdbcCommand cmd11 = new OdbcCommand(freeField9, dbConn);
+                cmd11.ExecuteNonQuery();
+
+
+                string freeField10 = "INSERT INTO PUB.JobFreeField (\"Job-ID\", \"Sub-Job-ID\", \"System-ID\", \"Sequence\", \"Module-ID\", \"Program-ID\",\"Free-Field-Char\")" +
+                            " VALUES (\'" + jobNum + "\', \' \', \'Viso\', \'10\', \'J/M\',\'jc/jobsu0.w\', \'No Perf, Score, etc\')";
+                OdbcCommand cmd7 = new OdbcCommand(freeField10, dbConn);
+                cmd7.ExecuteNonQuery();
+
+
+                string freeField11 = "INSERT INTO PUB.JobFreeField (\"Job-ID\", \"Sub-Job-ID\", \"System-ID\", \"Sequence\", \"Module-ID\", \"Program-ID\",\"Free-Field-Char\")" +
+            " VALUES (\'" + jobNum + "\', \' \', \'Viso\', \'11\', \'J/M\',\'jc/jobsu0.w\', \'No Certification\')";
+                OdbcCommand cmd8 = new OdbcCommand(freeField11, dbConn);
+                cmd8.ExecuteNonQuery();
+
+
+                string freeField12 = "INSERT INTO PUB.JobFreeField (\"Job-ID\", \"Sub-Job-ID\", \"System-ID\", \"Sequence\", \"Module-ID\", \"Program-ID\",\"Free-Field-Char\")" +
+                 " VALUES (\'" + jobNum + "\', \' \', \'Viso\', \'12\', \'J/M\',\'jc/jobsu0.w\', \'None\')";
+                OdbcCommand cmd9 = new OdbcCommand(freeField12, dbConn);
+                cmd9.ExecuteNonQuery();
+
+                string freeField13 = "INSERT INTO PUB.JobFreeField (\"Job-ID\", \"Sub-Job-ID\", \"System-ID\", \"Sequence\", \"Module-ID\", \"Program-ID\",\"Free-Field-Char\")" +
+            " VALUES (\'" + jobNum + "\', \' \', \'Viso\', \'13\', \'J/M\',\'jc/jobsu0.w\', \'DSF/Digital\')";
+                OdbcCommand cmd10 = new OdbcCommand(freeField13, dbConn);
+                cmd10.ExecuteNonQuery();
+
+                #endregion free fields
+
 
 
 
@@ -728,9 +785,22 @@ namespace sendKeys2
 
 
         //delete schedule transactin tags
+        //READ NOTES BEFORE (NOTES BELOW)**************
         private void button5_Click(object sender, EventArgs e)
         {
-
+            //*********************************
+            /*
+             * BEFORE DOING ANYTHING LOOK AT THE LAST VALUE IN THE TEXT DOCUMENT
+             * 
+             * on 09/11 i deleted many tags which where recently put in 
+             * so always go by last number in the transNumber text file
+             * 
+             * always be weary of what numbers you delete and update this below when you do
+             * 
+             * last number range was 450-1050
+             * 
+             *//**************************************
+                */
             string connectString = "DSN=Progress11;uid=bob;pwd=Orchard";
 
 
@@ -756,8 +826,8 @@ namespace sendKeys2
                 OdbcDataAdapter adapTest = new OdbcDataAdapter(queryTest3, dbConn);
                 adapTest.Fill(dtTest);
 
-
-
+                //look into DtTest before continuing
+                //Keep the breakpoint tthere and look into the datatable
                 //2) write to text file and then use excel to get a number range to copy over to jobs.txt
 
                 string filepath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/dtTocsv.txt";
@@ -780,6 +850,10 @@ namespace sendKeys2
 
                 }
 
+                int end = logList.Count;
+                end--;
+
+                MessageBox.Show("Done deleting tags " + logList[0].ToString() + " to " + logList[end].ToString());
 
             }//end connection
 
