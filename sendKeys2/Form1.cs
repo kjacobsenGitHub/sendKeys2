@@ -14,6 +14,9 @@ using System.IO;
 using System.Data.Odbc;
 using System.Data.SqlClient;
 using System.Threading;
+using System.Net;
+
+
 
 namespace sendKeys2
 {
@@ -401,6 +404,7 @@ namespace sendKeys2
 
 
         //digital job
+        //make one for business cards seperate
         private void button3_Click(object sender, EventArgs e)
         {
 
@@ -463,48 +467,18 @@ namespace sendKeys2
                 adapTest.Fill(dtTest);
 
 
-                string description = dtTest.Rows[0]["Job-Desc"].ToString();
+                //so we do get a link that auto downloads the pdf needed
 
-                string qty = dtTest.Rows[0]["Quantity-Ordered"].ToString();
-
-
-
-                //now that we have decription get the quote number between ()
-                string result = String.Empty;
-
-                while (description.Contains('(') && description.Contains(')'))
-                {
-                    int openIndex = description.IndexOf('(');
-                    int closeIndex = description.IndexOf(')');
-
-                    result += description.Substring(openIndex + 1, closeIndex - openIndex - 1) + " ";
-                    description = description.Remove(0, closeIndex + 1);
-                }
-
-                result.Trim();
-         
+                //table: Attachements?
+                DataTable dtUrl = new DataTable();
+                String queryUrl = "SELECT * FROM PUB.JobAttachment WHERE \"Job-ID\" = " + jobNum;  // AND \'Sequence\' =  \'4\'";
+                OdbcDataAdapter adapUrl = new OdbcDataAdapter(queryUrl, dbConn);
+                adapUrl.Fill(dtUrl);
 
 
-                //need to merge quote
-                //does this work? - like does it do the same as how we normally merge quotes
-                string merge = "UPDATE PUB.Job SET \"Last-Estimate-ID\" = \'" + result + "\' WHERE \"Job-ID\" = " + jobNum;
-                OdbcCommand cmdMerge = new OdbcCommand(merge, dbConn);
-                cmdMerge.ExecuteNonQuery();
-
-                //ask user for Job-Desc first line and QTY; Job-Desc  and    Quantity-Ordered  
-                string jobDesc = Interaction.InputBox("Ex) 1234 Business Card (Quote) D Kyle Jacobsen","First line Job Description:");
-
-
-                string descrip = "UPDATE PUB.Job SET \"Job-Desc\" = \'" + jobDesc + "\' WHERE \"Job-ID\" = " + jobNum;
-                OdbcCommand cmdMergeDesc = new OdbcCommand(descrip, dbConn);
-                cmdMergeDesc.ExecuteNonQuery();
-
-
-                string qtySQL = "UPDATE PUB.Job SET \"Quantity-Ordered\" = \'" + qty + "\' WHERE \"Job-ID\" = " + jobNum;
-                OdbcCommand cmdMergeQTY = new OdbcCommand(qtySQL, dbConn);
-                cmdMergeQTY.ExecuteNonQuery();
-
-
+                var client = new WebClient();
+                client.Credentials = new NetworkCredential("kjacobsen", "wood234Stock");
+                client.DownloadFile(dtUrl.Rows[0]["File-URL"].ToString(), "C:/Users/kjacobsen/Downloads/file.pdf");
 
                 //free fields
 
@@ -562,22 +536,147 @@ namespace sendKeys2
                 cmd9.ExecuteNonQuery();
 
                 string freeField13 = "INSERT INTO PUB.JobFreeField (\"Job-ID\", \"Sub-Job-ID\", \"System-ID\", \"Sequence\", \"Module-ID\", \"Program-ID\",\"Free-Field-Char\")" +
-            " VALUES (\'" + jobNum + "\', \' \', \'Viso\', \'13\', \'J/M\',\'jc/jobsu0.w\', \'DSF/Digital\')";
+                     " VALUES (\'" + jobNum + "\', \' \', \'Viso\', \'13\', \'J/M\',\'jc/jobsu0.w\', \'DSF/Digital\')";
                 OdbcCommand cmd10 = new OdbcCommand(freeField13, dbConn);
                 cmd10.ExecuteNonQuery();
 
                 #endregion free fields
 
+                //move file form downloads to DSF Jobs
+                string strFile  = Interaction.InputBox("Type in location number", "PDF Mover");
+
+
+                string pathDL = Path.Combine(
+                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                  "Downloads");
+                string filename = Path.GetFileName(pathDL);
+
+
+                string newPath = "";
+
+                switch (strFile)
+                {
+
+                    case "0": newPath = "//Visonas/AraxiVolume_Visonas/Jobs/DSF jobs/JOBS coming straight from DSF";
+                            break;
+
+                    case "1":
+                        newPath = "//VISOPRINERGY/AraxiVolume_VISOPRINERGY_J/Jobs/SmartHotFolders/ALL DSF JOBS HOTFOLDER/3.5x2 Bcards MULTIPLE versions SS 12x18";
+                        break;
+
+                    case "2":
+                        newPath = "//VISOPRINERGY/AraxiVolume_VISOPRINERGY_J/Jobs/SmartHotFolders/ALL DSF JOBS HOTFOLDER/3.5x2 Bcards MULTIPLE versions SW 12x18";
+                        break;
+
+
+                    case "3":
+                        newPath = "//VISOPRINERGY/AraxiVolume_VISOPRINERGY_J/Jobs/SmartHotFolders/ALL DSF JOBS HOTFOLDER/55mm x 85mm One Sided B-Cards";
+                        break;
+
+                    case "4":
+                        newPath = "//VISOPRINERGY/AraxiVolume_VISOPRINERGY_J/Jobs/SmartHotFolders/ALL DSF JOBS HOTFOLDER/Black_Epsilon B-card imprints";
+                        break;
+
+                    case "5":
+                        newPath = "//VISONAS/Public/DSF-Jobs/Prepress Changes 09";
+                        break;
+                  
+                }
 
 
 
+                System.IO.File.Move("C:/Users/kjacobsen/Downloads/file.pdf","C:/Users/kjacobsen/Downloads/"+ jobNum + ".pdf");
 
-                MessageBox.Show("Done with Digital job: " + jobNum);
+                File.Copy("C:/Users/kjacobsen/Downloads/" + jobNum+".pdf", newPath+"/"+jobNum+".pdf");
+
+                File.Move("C:/Users/kjacobsen/Downloads/" + jobNum + ".pdf",  "//VISONAS/Public/DSF-Jobs/Sent" + "/" + jobNum + ".pdf");
+
+
+                string description = dtTest.Rows[0]["Job-Desc"].ToString();
+                string qty = dtTest.Rows[0]["Quantity-Ordered"].ToString();
+
+
+
+                MessageBox.Show("Click Yes when finished:", "Please merge the quote within monarch", MessageBoxButtons.YesNo);
+
+                //requery for description after merge append with description form abaove
+
+
+                DataTable dtNewDesc = new DataTable();
+
+                String sqlStatDesc = "SELECT * FROM PUB.Job WHERE \"Job-ID\" = " + jobNum;  // AND \'Sequence\' =  \'4\'";
+
+                OdbcDataAdapter adapDesc = new OdbcDataAdapter(sqlStatDesc, dbConn);
+
+                //fill datatable
+                adapDesc.Fill(dtNewDesc);
+
+                //append the user input ^ to the estimate description and UPDATE 
+                string newDescrip = description + "\n" + dtNewDesc.Rows[0]["Job-Desc"].ToString();
+
+                string descrip = "UPDATE PUB.Job SET \"Job-Desc\" = \'" + newDescrip + "\' WHERE \"Job-ID\" = " + jobNum;
+                OdbcCommand cmdMergeDesc = new OdbcCommand(descrip, dbConn);
+                cmdMergeDesc.ExecuteNonQuery();
+                //end set job description
+
+
+                //set qty
+                string qtySQL = "UPDATE PUB.Job SET \"Quantity-Ordered\" = \'" + qty + "\' WHERE \"Job-ID\" = " + jobNum;
+                OdbcCommand cmdMergeQTY = new OdbcCommand(qtySQL, dbConn);
+                cmdMergeQTY.ExecuteNonQuery();
+                //end qty
+
+
+
+                #region Schedule board
+
+                string transNumberPath = "C:/Users/kjacobsen/source/repos/sendKeys2/sendKeys2/transNumber.txt";
+
+                var number = File.ReadAllLines(transNumberPath);
+
+                int num = Convert.ToInt32(number[0]);
+
+                //get current date
+                DateTime date = DateTime.Now;
+
+                string time = date.ToString("HHmm");
+
+                //set sechdule board to 3 tags and 70 
+                //now for the 3 free fields 780,900,950  - this is no working for some reason? MUST USE INSERT INTO cannot update as there is nothing there
+
+                num++;
+                string SBff1 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
+                                                 " VALUES (\'" + jobNum + "\', \'780\', \'50d\', \'" + num + "\', \'1\', \'Viso\', \'730\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'780\', \'0\', \'Schedule Board\')";
+                OdbcCommand sbCmd1 = new OdbcCommand(SBff1, dbConn);
+                sbCmd1.ExecuteNonQuery();
+
+
+                num++;
+                string SBff2 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
+                                                 " VALUES (\'" + jobNum + "\', \'900\', \'50d\', \'" + num + "\', \'1\', \'Viso\', \'900\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'900\', \'0\', \'Schedule Board\')";
+                OdbcCommand sbCmd2 = new OdbcCommand(SBff2, dbConn);
+                sbCmd2.ExecuteNonQuery();
+
+
+                num++;
+                string SBff3 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
+                                                 " VALUES (\'" + jobNum + "\', \'950\', \'50d\', \'" + num + "\', \'1\', \'Viso\', \'950\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'950\', \'0\', \'Schedule Board\')";
+                OdbcCommand sbCmd3 = new OdbcCommand(SBff3, dbConn);
+                sbCmd3.ExecuteNonQuery();
+                #endregion Schedule Region
+
+                //DO NOT FORGET TO write back new trans-number
+                StreamWriter sw = new StreamWriter(transNumberPath);
+                sw.WriteLine(num);
+                sw.Close();
+
+
+                MessageBox.Show("Done with job: "+jobNum+" {and print ticket for now!}");
 
 
             }//end connection
 
-            }//end digital job
+        }//end digital job
 
 
 
@@ -587,7 +686,9 @@ namespace sendKeys2
         {
 
 
-            string path = "C:/Users/kjacobsen/Desktop/jobs.txt";
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) +"/jobs.txt";
+
+            
 
             //read in txt file jobs
             var file = File.ReadAllLines(path);
