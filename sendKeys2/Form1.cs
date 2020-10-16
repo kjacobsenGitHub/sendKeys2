@@ -182,6 +182,13 @@ namespace sendKeys2
                                                  " VALUES (\'" + jobNum + "\', \'950\', \'70\', \'" + num + "\', \'1\', \'Viso\', \'950\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'950\', \'0\', \'Schedule Board\')";
                 OdbcCommand sbCmd3 = new OdbcCommand(SBff3, dbConn);
                 sbCmd3.ExecuteNonQuery();
+
+
+                StreamWriter sw = new StreamWriter(transNumberPath);
+                sw.WriteLine(num);
+                sw.Close();
+
+
                 #endregion Schedule Region
 
 
@@ -231,10 +238,7 @@ namespace sendKeys2
                 crystalReportViewer1.Refresh();
                 
 
-                StreamWriter sw = new StreamWriter(transNumberPath);
-                sw.WriteLine(num);
-                sw.Close();
-          
+             
 
             }//end connection 
 
