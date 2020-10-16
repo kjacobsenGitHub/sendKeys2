@@ -192,39 +192,6 @@ namespace sendKeys2
                 #endregion Schedule Region
 
 
-
-
-                #region DB query test
-
-                /*
-                //test query DB, gettign error from update sayign connetion not established
-
-                DataTable dtTest = new DataTable();
-
-                String queryTest3 = "SELECT  \"Free-Field-Char\" FROM PUB.JobFreeField WHERE \"Job-ID\" = 209234";// AND \'Sequence\' =  \'4\'";
-
-                OdbcDataAdapter adapTest = new OdbcDataAdapter(queryTest3, dbConn);
-
-                //fill datatable
-                adapTest.Fill(dtTest);
-
-                 */
-
-                #endregion db query test
-
-                //funciton to print the job ticket
-                // num++;
-
-                //need to add form tho.. or do i?
-                //seems like i do NOT need this
-                /*
-                string form = "INSERT INTO PUB.JobSpecForm (\"Form-ID\") VALUES (\'5\')";
-                OdbcCommand formAdd = new OdbcCommand(form, dbConn);
-                formAdd.ExecuteNonQuery();
-                */
-                //so this works
-                //here is where i need to generate the ticket with the data^
-
                 Tick80DSF ticket = new Tick80DSF();
 
                 ticket.SetDatabaseLogon("Bob", "Orchard","monarch18","gams1");
@@ -404,35 +371,6 @@ namespace sendKeys2
 
 
 
-
-                #region DB query test
-
-                /*
-                //test query DB, gettign error from update sayign connetion not established
-
-                DataTable dtTest = new DataTable();
-
-                String queryTest3 = "SELECT  \"Free-Field-Char\" FROM PUB.JobFreeField WHERE \"Job-ID\" = 209234";// AND \'Sequence\' =  \'4\'";
-
-                OdbcDataAdapter adapTest = new OdbcDataAdapter(queryTest3, dbConn);
-
-                //fill datatable
-                adapTest.Fill(dtTest);
-
-                 */
-
-                #endregion db query test
-
-
-                /*
-                //funciton to print the job ticket
-                //need to add form tho
-                string form = "INSERT INTO PUB.JobSpecForm (\"Form-ID\") VALUES (\'2\')";
-                OdbcCommand formAdd = new OdbcCommand(form, dbConn);
-                formAdd.ExecuteNonQuery();
-                */
-                //so this works
-                //here is where i need to generate the ticket with the data^
 
                 Tick80DSF ticket = new Tick80DSF();
 
@@ -929,28 +867,6 @@ namespace sendKeys2
                     #endregion Schedule Region
 
 
-
-                    #region DB query test
-
-                    /*
-                    //test query DB, gettign error from update sayign connetion not established
-
-                    DataTable dtTest = new DataTable();
-
-                    String queryTest3 = "SELECT  \"Free-Field-Char\" FROM PUB.JobFreeField WHERE \"Job-ID\" = 209234";// AND \'Sequence\' =  \'4\'";
-
-                    OdbcDataAdapter adapTest = new OdbcDataAdapter(queryTest3, dbConn);
-
-                    //fill datatable
-                    adapTest.Fill(dtTest);
-
-                     */
-
-                    #endregion db query test
-
-                    //funciton to print the job ticket
-
-
                 }//end connection
 
             }//end for loop
@@ -1099,22 +1015,7 @@ namespace sendKeys2
                 crystalReportViewer1.ReportSource = ticket;
                 crystalReportViewer1.Refresh();
 
-
-                //get list of printer names?
-                List<string> printers = new List<string>();
-
-
-                int printercount = System.Drawing.Printing.PrinterSettings.InstalledPrinters.Count;
-
-                foreach (String printer in System.Drawing.Printing.PrinterSettings.InstalledPrinters) {
-
-                    printers.Add(printer);
-
-                }
-
-
-                ticket.PrintOptions.PrinterName = printers[7].ToString();
-
+                ticket.PrintOptions.PrinterName =@"\\spire\SPIRE_60WO8.5x11";
                 ticket.PrintToPrinter(1, false, 0, 0);
 
 
