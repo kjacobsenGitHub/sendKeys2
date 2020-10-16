@@ -208,11 +208,13 @@ namespace sendKeys2
                 //funciton to print the job ticket
                 // num++;
 
-                //need to add form tho
-                string form = "INSERT INTO PUB.JobSpecForm (\"Form-ID\") VALUES (\'1\')";
+                //need to add form tho.. or do i?
+                //seems like i do NOT need this
+                /*
+                string form = "INSERT INTO PUB.JobSpecForm (\"Form-ID\") VALUES (\'5\')";
                 OdbcCommand formAdd = new OdbcCommand(form, dbConn);
                 formAdd.ExecuteNonQuery();
-
+                */
                 //so this works
                 //here is where i need to generate the ticket with the data^
 
@@ -388,6 +390,12 @@ namespace sendKeys2
                                                  " VALUES (\'" + jobNum + "\', \'950\', \'70\', \'" + num + "\', \'1\', \'Viso\', \'950\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'950\', \'0\', \'Schedule Board\')";
                 OdbcCommand sbCmd3 = new OdbcCommand(SBff3, dbConn);
                 sbCmd3.ExecuteNonQuery();
+
+
+                StreamWriter sw = new StreamWriter(transNumberPath);
+                sw.WriteLine(num);
+                sw.Close();
+
                 #endregion Schedule Region
 
 
@@ -411,12 +419,14 @@ namespace sendKeys2
 
                 #endregion db query test
 
+
+                /*
                 //funciton to print the job ticket
                 //need to add form tho
-                string form = "INSERT INTO PUB.JobSpecForm (\"Form-ID\") VALUES (\'1\')";
+                string form = "INSERT INTO PUB.JobSpecForm (\"Form-ID\") VALUES (\'2\')";
                 OdbcCommand formAdd = new OdbcCommand(form, dbConn);
                 formAdd.ExecuteNonQuery();
-
+                */
                 //so this works
                 //here is where i need to generate the ticket with the data^
 
@@ -433,9 +443,7 @@ namespace sendKeys2
                 crystalReportViewer1.Refresh();
 
 
-                StreamWriter sw = new StreamWriter(transNumberPath);
-                sw.WriteLine(num);
-                sw.Close();
+               
            
 
             }//end conncetion
@@ -708,12 +716,15 @@ namespace sendKeys2
                                                  " VALUES (\'" + jobNum + "\', \'950\', \'50d\', \'" + num + "\', \'1\', \'Viso\', \'950\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'950\', \'0\', \'Schedule Board\')";
                 OdbcCommand sbCmd3 = new OdbcCommand(SBff3, dbConn);
                 sbCmd3.ExecuteNonQuery();
-                #endregion Schedule Region
 
                 //DO NOT FORGET TO write back new trans-number
                 StreamWriter sw = new StreamWriter(transNumberPath);
                 sw.WriteLine(num);
                 sw.Close();
+
+
+
+                #endregion Schedule Region
 
 
 
@@ -902,13 +913,18 @@ namespace sendKeys2
                                                      " VALUES (\'" + jobNum + "\', \'950\', \'70\', \'" + num + "\', \'1\', \'Viso\', \'950\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'950\', \'0\', \'Schedule Board\')";
                     OdbcCommand sbCmd3 = new OdbcCommand(SBff3, dbConn);
                     sbCmd3.ExecuteNonQuery();
-                    #endregion Schedule Region
 
 
-                    //write the new trans number to text file
+                    //DO NOT FORGET TO write back new trans-number
                     StreamWriter sw = new StreamWriter(transNumberPath);
                     sw.WriteLine(num);
                     sw.Close();
+
+
+
+                    #endregion Schedule Region
+
+
 
                     #region DB query test
 
