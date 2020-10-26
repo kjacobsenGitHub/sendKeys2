@@ -606,6 +606,9 @@ namespace sendKeys2
                 //fill datatable
                 adapDesc.Fill(dtNewDesc);
 
+
+               
+                try{
                 //append the user input ^ to the estimate description and UPDATE 
                 string newDescrip = description + "\n" + dtNewDesc.Rows[0]["Job-Desc"].ToString();
 
@@ -620,7 +623,29 @@ namespace sendKeys2
                 OdbcCommand cmdMergeQTY = new OdbcCommand(qtySQL, dbConn);
                 cmdMergeQTY.ExecuteNonQuery();
                 //end qty
+                }catch(Exception ex){
+                
+                    //sql commans sometimes breaks program, notcied when jobs decriptions have a single quote in them
+                    //take newDecrip and delete the signel quote and try again
+                    //append the user input ^ to the estimate description and UPDATE 
+                string newDescrip = description + "\n" + dtNewDesc.Rows[0]["Job-Desc"].ToString();
 
+                    string noQuote = newDescrip.Trim('\'');
+    
+                string descrip = "UPDATE PUB.Job SET \"Job-Desc\" = \'" + noQuote + "\' WHERE \"Job-ID\" = " + jobNum;
+                OdbcCommand cmdMergeDesc = new OdbcCommand(descrip, dbConn);
+                cmdMergeDesc.ExecuteNonQuery();
+                //end set job description
+
+
+                //set qty
+                string qtySQL = "UPDATE PUB.Job SET \"Quantity-Ordered\" = \'" + qty + "\' WHERE \"Job-ID\" = " + jobNum;
+                OdbcCommand cmdMergeQTY = new OdbcCommand(qtySQL, dbConn);
+                cmdMergeQTY.ExecuteNonQuery();
+                //end qty
+                    
+                
+                }//end catch
 
 
                 #region Schedule board
@@ -1516,7 +1541,191 @@ namespace sendKeys2
               
             }//end connection
             }
-        }//end form
+
+
+        //digital download jobs
+        private void button9_Click(object sender, EventArgs e)
+        {
+
+            //string to open connection to DB
+            string connectString = "DSN=Progress11;uid=bob;pwd=Orchard";
+
+
+            //try inserting record row into dataset2
+            using (OdbcConnection dbConn = new OdbcConnection(connectString))
+            {
+
+                try  //to open connection
+                {
+                    dbConn.Open();
+
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("No connect");
+                }
+
+                //end conection check
+
+
+                //use 209234 as test case
+
+                //ask user for job #
+                string jobNum = Interaction.InputBox("Job Number?", "Job Number?");
+
+
+                #region Invenotry job
+
+                string zeroTime = "00:00";
+
+                //so update sql query does work this is the format (line below) 
+                //string updateQuery = "UPDATE PUB.Job SET \"Sales-Rep-ID\" = " + "'DN' WHERE \"Job-ID\" = "+jobNum;
+
+                //promised time (Time-Promised) to 00:00 (does nto show up on dsf report)
+                string promisedBy = "UPDATE PUB.Job SET \"Time-Promised\" = \'" + zeroTime + "\' WHERE \"Job-ID\" = " + jobNum;
+                OdbcCommand cmd = new OdbcCommand(promisedBy, dbConn);
+                cmd.ExecuteNonQuery();
+
+                //ship by time (Time-Ship-By) to )
+                string shipBy = "UPDATE PUB.Job SET \"Time-Ship-By\" = \'" + zeroTime + "\' WHERE \"Job-ID\" = " + jobNum;
+                OdbcCommand cmd2 = new OdbcCommand(shipBy, dbConn);
+                cmd2.ExecuteNonQuery();
+
+                //Time stamp reset this works, sets it to 0:00
+
+                //**************************************************
+
+                #region Free fields
+                //now for job free fields for inventory order
+                //5/12 was stuck for a little bit, it was those dam quotes it has to be \"\" also for some reason the word Sequence needed
+                //them evne thi no dash in name
+                string freeField1 = "INSERT INTO PUB.JobFreeField (\"Job-ID\", \"Sub-Job-ID\", \"System-ID\", \"Sequence\", \"Module-ID\", \"Program-ID\",\"Free-Field-Char\")" +
+                 " VALUES (\'" + jobNum + "\', \' \', \'Viso\', \'2\', \'J/M\',\'jc/jobsu0.w\', \'DSF\')";
+                OdbcCommand cmd3 = new OdbcCommand(freeField1, dbConn);
+                cmd3.ExecuteNonQuery();
+
+
+                //this one does not work, may be able to get by without however
+                string freeField2 = "INSERT INTO PUB.JobFreeField (\"Job-ID\", \"Sub-Job-ID\", \"System-ID\", \"Sequence\", \"Module-ID\", \"Program-ID\",\"Free-Field-Char\")" +
+                 " VALUES (\'" + jobNum + "\', \' \', \'Viso\', \'3\', \'J/M\',\'jc/jobsu0.w\', \'1\')";
+                OdbcCommand cmd4 = new OdbcCommand(freeField2, dbConn);
+                cmd4.ExecuteNonQuery();
+
+
+                string freeField3 = "INSERT INTO PUB.JobFreeField (\"Job-ID\", \"Sub-Job-ID\", \"System-ID\", \"Sequence\", \"Module-ID\", \"Program-ID\",\"Free-Field-Char\")" +
+              " VALUES (\'" + jobNum + "\', \' \', \'Viso\', \'4\', \'J/M\',\'jc/jobsu0.w\', \'None\')";
+                OdbcCommand cmd5 = new OdbcCommand(freeField3, dbConn);
+                cmd5.ExecuteNonQuery();
+
+
+                string freeField4 = "INSERT INTO PUB.JobFreeField (\"Job-ID\", \"Sub-Job-ID\", \"System-ID\", \"Sequence\", \"Module-ID\", \"Program-ID\",\"Free-Field-Char\")" +
+                            " VALUES (\'" + jobNum + "\', \' \', \'Viso\', \'6\', \'J/M\',\'jc/jobsu0.w\', \'N/A\')";
+                OdbcCommand cmd6 = new OdbcCommand(freeField4, dbConn);
+                cmd6.ExecuteNonQuery();
+
+
+                string freeField9 = "INSERT INTO PUB.JobFreeField (\"Job-ID\", \"Sub-Job-ID\", \"System-ID\", \"Sequence\", \"Module-ID\", \"Program-ID\",\"Free-Field-Char\")" +
+                " VALUES (\'" + jobNum + "\', \' \', \'Viso\', \'9\', \'J/M\',\'jc/jobsu0.w\', \'None\')";
+                OdbcCommand cmd11 = new OdbcCommand(freeField9, dbConn);
+                cmd11.ExecuteNonQuery();
+
+
+                string freeField10 = "INSERT INTO PUB.JobFreeField (\"Job-ID\", \"Sub-Job-ID\", \"System-ID\", \"Sequence\", \"Module-ID\", \"Program-ID\",\"Free-Field-Char\")" +
+                            " VALUES (\'" + jobNum + "\', \' \', \'Viso\', \'10\', \'J/M\',\'jc/jobsu0.w\', \'No Perf, Score, etc\')";
+                OdbcCommand cmd7 = new OdbcCommand(freeField10, dbConn);
+                cmd7.ExecuteNonQuery();
+
+
+                string freeField11 = "INSERT INTO PUB.JobFreeField (\"Job-ID\", \"Sub-Job-ID\", \"System-ID\", \"Sequence\", \"Module-ID\", \"Program-ID\",\"Free-Field-Char\")" +
+            " VALUES (\'" + jobNum + "\', \' \', \'Viso\', \'11\', \'J/M\',\'jc/jobsu0.w\', \'No Certification\')";
+                OdbcCommand cmd8 = new OdbcCommand(freeField11, dbConn);
+                cmd8.ExecuteNonQuery();
+
+
+                string freeField12 = "INSERT INTO PUB.JobFreeField (\"Job-ID\", \"Sub-Job-ID\", \"System-ID\", \"Sequence\", \"Module-ID\", \"Program-ID\",\"Free-Field-Char\")" +
+                 " VALUES (\'" + jobNum + "\', \' \', \'Viso\', \'12\', \'J/M\',\'jc/jobsu0.w\', \'None\')";
+                OdbcCommand cmd9 = new OdbcCommand(freeField12, dbConn);
+                cmd9.ExecuteNonQuery();
+
+                string freeField13 = "INSERT INTO PUB.JobFreeField (\"Job-ID\", \"Sub-Job-ID\", \"System-ID\", \"Sequence\", \"Module-ID\", \"Program-ID\",\"Free-Field-Char\")" +
+            " VALUES (\'" + jobNum + "\', \' \', \'Viso\', \'13\', \'J/M\',\'jc/jobsu0.w\', \'DSF/Inventory\')";
+                OdbcCommand cmd10 = new OdbcCommand(freeField13, dbConn);
+                cmd10.ExecuteNonQuery();
+
+                #endregion free fields
+
+
+                #endregion invenotry job
+
+
+
+                #region Schedule Board
+
+
+
+                string transNumberPath = "//visonas/Public/Kyle/dsf job processing program/transNumber.txt";
+
+                var number = File.ReadAllLines(transNumberPath);
+
+                int num = Convert.ToInt32(number[0]);
+
+                //get current date
+                DateTime date = DateTime.Now;
+
+                string time = date.ToString("HHmm");
+
+                //set sechdule board to 3 tags and 70 
+                //now for the 3 free fields 780,900,950  - this is no working for some reason? MUST USE INSERT INTO cannot update as there is nothing there
+
+                num++;
+                string SBff1 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
+                                                 " VALUES (\'" + jobNum + "\', \'780\', \'97\', \'" + num + "\', \'1\', \'Viso\', \'730\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'780\', \'0\', \'Schedule Board\')";
+                OdbcCommand sbCmd1 = new OdbcCommand(SBff1, dbConn);
+                sbCmd1.ExecuteNonQuery();
+
+
+                num++;
+                string SBff2 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
+                                                 " VALUES (\'" + jobNum + "\', \'900\', \'97\', \'" + num + "\', \'1\', \'Viso\', \'900\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'900\', \'0\', \'Schedule Board\')";
+                OdbcCommand sbCmd2 = new OdbcCommand(SBff2, dbConn);
+                sbCmd2.ExecuteNonQuery();
+
+
+                num++;
+                string SBff3 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
+                                                 " VALUES (\'" + jobNum + "\', \'950\', \'97\', \'" + num + "\', \'1\', \'Viso\', \'950\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'1\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'950\', \'0\', \'Schedule Board\')";
+                OdbcCommand sbCmd3 = new OdbcCommand(SBff3, dbConn);
+                sbCmd3.ExecuteNonQuery();
+
+
+                StreamWriter sw = new StreamWriter(transNumberPath);
+                sw.WriteLine(num);
+                sw.Close();
+
+
+                #endregion Schedule Region
+
+
+                Tick80DSF ticket = new Tick80DSF();
+
+                ticket.SetDatabaseLogon("Bob", "Orchard", "monarch18", "gams1");
+                ticket.SetDatabaseLogon("Bob", "Orchard");
+
+
+                ticket.SetParameterValue("Job-ID", jobNum);
+                ticket.SetParameterValue("System-ID", "Viso");
+
+                crystalReportViewer1.ReportSource = ticket;
+                crystalReportViewer1.Refresh();
+
+
+
+
+            }//end connection 
+
+
+        }
+    }//end form
 
 }//end class
 
