@@ -28,6 +28,10 @@ namespace sendKeys2
         }
 
 
+
+        bool changes = false;
+
+
         //inventory item 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -200,6 +204,10 @@ namespace sendKeys2
 
                 ticket.SetParameterValue("Job-ID", jobNum);
                 ticket.SetParameterValue("System-ID", "Viso");
+
+
+                ticket.SetParameterValue("Sub-Job-ID", "");
+               
 
                 crystalReportViewer1.ReportSource = ticket;
                 crystalReportViewer1.Refresh();
@@ -380,6 +388,10 @@ namespace sendKeys2
 
                 ticket.SetParameterValue("Job-ID", jobNum);
                 ticket.SetParameterValue("System-ID", "Viso");
+
+
+                ticket.SetParameterValue("Sub-Job-ID", "");
+               
 
                 crystalReportViewer1.ReportSource = ticket;
                 crystalReportViewer1.Refresh();
@@ -572,6 +584,7 @@ namespace sendKeys2
 
                     case "5":
                         newPath = "//VISONAS/Public/DSF-Jobs/Prepress Changes 09";
+                        changes = true;
                         break;
                   
                 }
@@ -624,20 +637,24 @@ namespace sendKeys2
                 cmdMergeQTY.ExecuteNonQuery();
                 //end qty
                 }catch(Exception ex){
-                
+
+                    
                     //sql commans sometimes breaks program, notcied when jobs decriptions have a single quote in them
                     //take newDecrip and delete the signel quote and try again
                     //append the user input ^ to the estimate description and UPDATE 
                 string newDescrip = description + "\n" + dtNewDesc.Rows[0]["Job-Desc"].ToString();
 
-                    string noQuote = newDescrip.Trim('\'');
-    
-                string descrip = "UPDATE PUB.Job SET \"Job-Desc\" = \'" + noQuote + "\' WHERE \"Job-ID\" = " + jobNum;
-                OdbcCommand cmdMergeDesc = new OdbcCommand(descrip, dbConn);
-                cmdMergeDesc.ExecuteNonQuery();
-                //end set job description
+                  string noQuote = newDescrip.Trim('\'');
 
-
+                    try
+                    {
+                        string descrip = "UPDATE PUB.Job SET \"Job-Desc\" = \'" + noQuote + "\' WHERE \"Job-ID\" = " + jobNum;
+                        OdbcCommand cmdMergeDesc = new OdbcCommand(descrip, dbConn);
+                        cmdMergeDesc.ExecuteNonQuery();
+                        //end set job description
+                    }
+                    catch (Exception ex2) { }
+                    
                 //set qty
                 string qtySQL = "UPDATE PUB.Job SET \"Quantity-Ordered\" = \'" + qty + "\' WHERE \"Job-ID\" = " + jobNum;
                 OdbcCommand cmdMergeQTY = new OdbcCommand(qtySQL, dbConn);
@@ -664,26 +681,60 @@ namespace sendKeys2
                 //set sechdule board to 3 tags and 70 
                 //now for the 3 free fields 780,900,950  - this is no working for some reason? MUST USE INSERT INTO cannot update as there is nothing there
 
-                num++;
-                string SBff1 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
-                                                 " VALUES (\'" + jobNum + "\', \'780\', \'50d\', \'" + num + "\', \'1\', \'Viso\', \'730\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'780\', \'0\', \'Schedule Board\')";
-                OdbcCommand sbCmd1 = new OdbcCommand(SBff1, dbConn);
-                sbCmd1.ExecuteNonQuery();
+                if (changes = false)
+                {
+                    num++;
+                    string SBff1 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
+                                                     " VALUES (\'" + jobNum + "\', \'780\', \'50d\', \'" + num + "\', \'1\', \'Viso\', \'730\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'780\', \'0\', \'Schedule Board\')";
+                    OdbcCommand sbCmd1 = new OdbcCommand(SBff1, dbConn);
+                    sbCmd1.ExecuteNonQuery();
 
 
-                num++;
-                string SBff2 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
-                                                 " VALUES (\'" + jobNum + "\', \'900\', \'50d\', \'" + num + "\', \'1\', \'Viso\', \'900\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'900\', \'0\', \'Schedule Board\')";
-                OdbcCommand sbCmd2 = new OdbcCommand(SBff2, dbConn);
-                sbCmd2.ExecuteNonQuery();
+                    num++;
+                    string SBff2 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
+                                                     " VALUES (\'" + jobNum + "\', \'900\', \'50d\', \'" + num + "\', \'1\', \'Viso\', \'900\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'900\', \'0\', \'Schedule Board\')";
+                    OdbcCommand sbCmd2 = new OdbcCommand(SBff2, dbConn);
+                    sbCmd2.ExecuteNonQuery();
 
 
-                num++;
-                string SBff3 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
-                                                 " VALUES (\'" + jobNum + "\', \'950\', \'50d\', \'" + num + "\', \'1\', \'Viso\', \'950\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'950\', \'0\', \'Schedule Board\')";
-                OdbcCommand sbCmd3 = new OdbcCommand(SBff3, dbConn);
-                sbCmd3.ExecuteNonQuery();
+                    num++;
+                    string SBff3 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
+                                                     " VALUES (\'" + jobNum + "\', \'950\', \'50d\', \'" + num + "\', \'1\', \'Viso\', \'950\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'950\', \'0\', \'Schedule Board\')";
+                    OdbcCommand sbCmd3 = new OdbcCommand(SBff3, dbConn);
+                    sbCmd3.ExecuteNonQuery();
+                }
 
+                else {
+
+                    num++;
+                    string SBff1 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
+                                                     " VALUES (\'" + jobNum + "\', \'780\', \'09\', \'" + num + "\', \'1\', \'Viso\', \'730\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'780\', \'0\', \'Schedule Board\')";
+                    OdbcCommand sbCmd1 = new OdbcCommand(SBff1, dbConn);
+                    sbCmd1.ExecuteNonQuery();
+
+
+                    num++;
+                    string SBff2 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
+                                                     " VALUES (\'" + jobNum + "\', \'900\', \'09\', \'" + num + "\', \'1\', \'Viso\', \'900\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'900\', \'0\', \'Schedule Board\')";
+                    OdbcCommand sbCmd2 = new OdbcCommand(SBff2, dbConn);
+                    sbCmd2.ExecuteNonQuery();
+
+
+                    num++;
+                    string SBff3 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
+                                                     " VALUES (\'" + jobNum + "\', \'950\', \'09\', \'" + num + "\', \'1\', \'Viso\', \'950\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'950\', \'0\', \'Schedule Board\')";
+                    OdbcCommand sbCmd3 = new OdbcCommand(SBff3, dbConn);
+                    sbCmd3.ExecuteNonQuery();
+
+                    num++;
+                    string SBff4 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
+                                                     " VALUES (\'" + jobNum + "\', \'105\', \'09\', \'" + num + "\', \'1\', \'Viso\', \'105\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'105\', \'0\', \'Schedule Board\')";
+                    OdbcCommand sbCmd4 = new OdbcCommand(SBff4, dbConn);
+                    sbCmd4.ExecuteNonQuery();
+
+                }
+
+                changes = false;
                 //DO NOT FORGET TO write back new trans-number
                 StreamWriter sw = new StreamWriter(transNumberPath);
                 sw.WriteLine(num);
@@ -693,7 +744,7 @@ namespace sendKeys2
 
                 #endregion Schedule Region
 
-
+               
 
                 Tick80DSF ticket = new Tick80DSF();
 
@@ -703,6 +754,10 @@ namespace sendKeys2
 
                 ticket.SetParameterValue("Job-ID", jobNum);
                 ticket.SetParameterValue("System-ID", "Viso");
+
+
+                ticket.SetParameterValue("Sub-Job-ID", "");
+               
 
                 crystalReportViewer1.ReportSource = ticket;
                 crystalReportViewer1.Refresh();
@@ -1036,6 +1091,10 @@ namespace sendKeys2
 
                 ticket.SetParameterValue("Job-ID", file[x]);
                 ticket.SetParameterValue("System-ID", "Viso");
+
+
+                ticket.SetParameterValue("Sub-Job-ID", "");
+                
 
                 crystalReportViewer1.ReportSource = ticket;
                 crystalReportViewer1.Refresh();
@@ -1432,6 +1491,7 @@ namespace sendKeys2
 
                     case "5":
                         newPath = "//VISONAS/Public/DSF-Jobs/Prepress Changes 09";
+                        changes = true;
                         break;
 
                 }
@@ -1494,29 +1554,62 @@ namespace sendKeys2
 
                 string time = date.ToString("HHmm");
 
-                //set sechdule board to 3 tags and 70 
-                //now for the 3 free fields 780,900,950  - this is no working for some reason? MUST USE INSERT INTO cannot update as there is nothing there
-
-                num++;
-                string SBff1 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
-                                                 " VALUES (\'" + jobNum + "\', \'780\', \'50d\', \'" + num + "\', \'1\', \'Viso\', \'730\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'780\', \'0\', \'Schedule Board\')";
-                OdbcCommand sbCmd1 = new OdbcCommand(SBff1, dbConn);
-                sbCmd1.ExecuteNonQuery();
-
-
-                num++;
-                string SBff2 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
-                                                 " VALUES (\'" + jobNum + "\', \'900\', \'50d\', \'" + num + "\', \'1\', \'Viso\', \'900\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'900\', \'0\', \'Schedule Board\')";
-                OdbcCommand sbCmd2 = new OdbcCommand(SBff2, dbConn);
-                sbCmd2.ExecuteNonQuery();
+                
+                if (changes = false)
+                {
+                    num++;
+                    string SBff1 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
+                                                     " VALUES (\'" + jobNum + "\', \'780\', \'50d\', \'" + num + "\', \'1\', \'Viso\', \'730\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'780\', \'0\', \'Schedule Board\')";
+                    OdbcCommand sbCmd1 = new OdbcCommand(SBff1, dbConn);
+                    sbCmd1.ExecuteNonQuery();
 
 
-                num++;
-                string SBff3 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
-                                                 " VALUES (\'" + jobNum + "\', \'950\', \'50d\', \'" + num + "\', \'1\', \'Viso\', \'950\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'950\', \'0\', \'Schedule Board\')";
-                OdbcCommand sbCmd3 = new OdbcCommand(SBff3, dbConn);
-                sbCmd3.ExecuteNonQuery();
+                    num++;
+                    string SBff2 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
+                                                     " VALUES (\'" + jobNum + "\', \'900\', \'50d\', \'" + num + "\', \'1\', \'Viso\', \'900\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'900\', \'0\', \'Schedule Board\')";
+                    OdbcCommand sbCmd2 = new OdbcCommand(SBff2, dbConn);
+                    sbCmd2.ExecuteNonQuery();
+
+
+                    num++;
+                    string SBff3 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
+                                                     " VALUES (\'" + jobNum + "\', \'950\', \'50d\', \'" + num + "\', \'1\', \'Viso\', \'950\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'950\', \'0\', \'Schedule Board\')";
+                    OdbcCommand sbCmd3 = new OdbcCommand(SBff3, dbConn);
+                    sbCmd3.ExecuteNonQuery();
+                }
+
+                else {
+
+                    num++;
+                    string SBff1 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
+                                                     " VALUES (\'" + jobNum + "\', \'780\', \'09\', \'" + num + "\', \'1\', \'Viso\', \'730\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'780\', \'0\', \'Schedule Board\')";
+                    OdbcCommand sbCmd1 = new OdbcCommand(SBff1, dbConn);
+                    sbCmd1.ExecuteNonQuery();
+
+
+                    num++;
+                    string SBff2 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
+                                                     " VALUES (\'" + jobNum + "\', \'900\', \'09\', \'" + num + "\', \'1\', \'Viso\', \'900\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'900\', \'0\', \'Schedule Board\')";
+                    OdbcCommand sbCmd2 = new OdbcCommand(SBff2, dbConn);
+                    sbCmd2.ExecuteNonQuery();
+
+
+                    num++;
+                    string SBff3 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
+                                                     " VALUES (\'" + jobNum + "\', \'950\', \'09\', \'" + num + "\', \'1\', \'Viso\', \'950\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'950\', \'0\', \'Schedule Board\')";
+                    OdbcCommand sbCmd3 = new OdbcCommand(SBff3, dbConn);
+                    sbCmd3.ExecuteNonQuery();
+
+                    num++;
+                    string SBff4 = "INSERT INTO PUB.ScheduleByJob (\"Job-ID\", \"Work-Center-ID\", \"TagStatus-ID\", \"Trans-Number-ScheduleByJob\", \"View-Tag\", \"System-ID\", \"SchedulingCenter-ID\", \"Date-Scheduled\", \"Update-date\", \"Created-By\", \"Prog-Name\", \"Date-Promised\", \"Time-On-In-Seconds\", \"Time-Off-In-Seconds\", \"Created-Date\", \"Update-Time\", \"Time-On\", \"Time-Off\", \"SchedulingDepartment-ID\", \"Tag-Complete\", \"Toggle1\", \"Toggle2\", \"Toggle3\", \"Number-of-Resources\",\"Date-Sort\", \"Original-Work-Center-ID\", \"Trans-Num-Task\", \"Schedule-Source\")" +
+                                                     " VALUES (\'" + jobNum + "\', \'105\', \'09\', \'" + num + "\', \'1\', \'Viso\', \'105\', \'" + date + "\', \'" + date + "\', \'kjacobsen\', \'USER-INTERFACE-TRIGGER sb/sb-sba0-d.w\', \'" + date + "\', \'35640\',\'35640\', \'" + date + "\', \'09:54:06\', \'0954\', \'0954\', \'Bin\', \'0\', \'0\',\'0\',\'0\', \'1\', \'" + date + "\', \'105\', \'0\', \'Schedule Board\')";
+                    OdbcCommand sbCmd4 = new OdbcCommand(SBff4, dbConn);
+                    sbCmd4.ExecuteNonQuery();
+
+                }
                 #endregion Schedule Region
+
+                changes = false;
 
                 //DO NOT FORGET TO write back new trans-number
                 StreamWriter sw = new StreamWriter(transNumberPath);
@@ -1533,6 +1626,9 @@ namespace sendKeys2
 
                 ticket.SetParameterValue("Job-ID", jobNum);
                 ticket.SetParameterValue("System-ID", "Viso");
+
+                ticket.SetParameterValue("Sub-Job-ID", "");
+             
 
                 crystalReportViewer1.ReportSource = ticket;
                 crystalReportViewer1.Refresh();
@@ -1715,6 +1811,10 @@ namespace sendKeys2
                 ticket.SetParameterValue("Job-ID", jobNum);
                 ticket.SetParameterValue("System-ID", "Viso");
 
+
+                ticket.SetParameterValue("Sub-Job-ID", "");
+                
+
                 crystalReportViewer1.ReportSource = ticket;
                 crystalReportViewer1.Refresh();
 
@@ -1725,6 +1825,50 @@ namespace sendKeys2
 
 
         }
+
+
+        //read in txt file (jobs.txt) and change each
+        //job to status 97
+        private void button10_Click(object sender, EventArgs e)
+        {
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/jobs.txt";
+
+            string connectString = "DSN=Progress11;uid=bob;pwd=Orchard";
+
+            using (OdbcConnection dbConn = new OdbcConnection(connectString))
+            {
+
+                //read in txt file jobs
+                var file = File.ReadAllLines(path);
+
+                dbConn.Open();
+
+                for (int x = 0; x < file.Length; x++)
+                {
+
+                    string update97 = "UPDATE PUB.ScheduleByJob SET \"TagStatus-ID\"=\'97b\' WHERE \"Job-ID\"=" + file[x].ToString();
+                    OdbcCommand adap97 = new OdbcCommand(update97, dbConn);
+                     
+                    adap97.ExecuteNonQuery();
+
+                    //also complete the work center id where = 950
+                    string tagComplete = "UPDATE PUB.ScheduleByJob SET \"Tag-Complete\"=\'1\' WHERE \"Work-Center-ID\"=\'950\' AND \"Job-ID\"="+file[x].ToString();
+                    OdbcCommand adapComplete = new OdbcCommand(tagComplete,dbConn);
+
+                    adapComplete.ExecuteNonQuery();
+
+                }
+
+                dbConn.Close();
+                MessageBox.Show("Done with "+file.Length+" jobs.");
+            
+            
+            }//end conecyion
+
+
+            }//end 97 status credit card
+
+
     }//end form
 
 }//end class
